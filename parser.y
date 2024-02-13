@@ -29,19 +29,20 @@ Symbols<Types> symbols;
 %}
 
 %define parse.error verbose
-
+%debug
 %union {
 	CharPtr iden;
 	Types type;
+	
 }
 
 %token <iden> IDENTIFIER 
 
-%token <type> INT_LITERAL REAL_LITERAL BOOL_LITERAL NOTOP CHAR_LITERAL HEX_LITERAL FLOAT_LITERAL CASE CASES TRUE FALSE ELSE ENDIF IF 
+%token <type> INT_LITERAL REAL_LITERAL BOOL_LITERAL NOTOP CHAR_LITERAL HEX_LITERAL FLOAT_LITERAL CASE CASES TRUE FALSE ELSE ENDIF IF ELSIF
 
 %token ADDOP MULOP ANDOP RELOP REMOP EXPOP OROP NEGOP ARROW THEN WHEN 
 
-%token BEGIN_ BOOLEAN CHARACTER END REDUCE ENDCASE ENDREDUCE ENDSWITCH FUNCTION INTEGER IS LIST OF OTHERS RETURNS SWITCH REAL ELSIF FOLD ENDFOLD LEFT RIGHT
+%token BEGIN_ BOOLEAN CHARACTER END REDUCE ENDCASE ENDREDUCE ENDSWITCH FUNCTION INTEGER IS LIST OF OTHERS RETURNS SWITCH REAL FOLD ENDFOLD LEFT RIGHT
 
 %type <type> list expressions body type statement_ statement cases case expression term primary if_statement condition relation elsif_clauses parameter 
 
@@ -64,8 +65,12 @@ optional_variable:
 
 variable:	
 	IDENTIFIER ':' type IS statement ';' {checkAssignment($3, $5, "Variable Initialization"); scalars.insert($1, $3);}|
-	IDENTIFIER ':' LIST OF type IS list ';' 
-	{lists.insert($1, $5);};
+	IDENTIFIER ':' LIST OF type IS list ';' {
+	    if ($5 != $7) { 
+	        appendError(GENERAL_SEMANTIC, "List Types Does Not Match Element Types");
+	    }
+	    lists.insert($1, $5);
+	};
 
 body:
 	BEGIN_ statement_ END ';' {$$ = $2;};
@@ -86,9 +91,22 @@ list:
 	'(' expressions ')' {$$ = $2;};
 
 expressions:
-	expressions ',' expression| 
-	expression ;
+    expression { 
+        $$ = $1; // $$ is now a Types value
+    }
+    | expressions ',' expression {
+        if (typeToString($1) != typeToString($3)) { 
+            appendError(GENERAL_SEMANTIC, "List Element Types Do Not Match");
+            $$ = MISMATCH; 
+        } else {
+            $$ = $3; 
+        }
+    }; 
+	
 
+expression:
+	expression ADDOP term {$$ = checkArithmetic($1, $3);} |
+	term ;
 
 statement_:
 	statement ';' |
@@ -101,12 +119,12 @@ statement:
 	if_statement ;
 
 if_statement:
-    IF condition THEN statement_ elsif_clauses ENDIF { $$ =  checkIFThen($2, $4, $5); } |
-    IF condition THEN statement_ elsif_clauses ELSE statement_ ENDIF {$$ = checkIFThen($2, $4, $5);};
+    IF condition THEN statement_ elsif_clauses ENDIF { $$ =  checkIFThen($2, $4, $5);} |
+    IF condition THEN statement_ elsif_clauses ELSE statement_ ENDIF { $$ = checkIFThenElsifElse($2, $4, $5, $7);};
 
 elsif_clauses:
     %empty { $$ = NONE; }|  
-    ELSIF condition THEN statement_ elsif_clauses { $$ = checkIFThen($2, $4, $5); };
+    ELSIF condition THEN statement_ elsif_clauses ;
 
 cases:
 	cases case {$$ = checkCases($1, $2);}|
@@ -129,12 +147,8 @@ logical_operator:
 
 relation:
 	'(' condition')' {$$ = $2;}|
-	expression RELOP expression {$$ = checkRelational($1, $3);};
+	expression RELOP expression {$$ = checkRelation($1, $3);};
 	
-expression:
-	expression ADDOP term {$$ = checkArithmetic($1, $3);} |
-	term ;
-
 term:
 	term MULOP primary {$$ = checkArithmetic($1, $3);} |
 	primary ;
@@ -142,11 +156,17 @@ term:
 primary:
 	'(' expression ')' {$$ = $2;} |
 	expression arithmetic_operator expression |
-   NEGOP expression { $$ = checkNegation($2); }|
+    NEGOP expression { $$ = checkNegation($2); }|
 	INT_LITERAL | 
 	CHAR_LITERAL |
 	REAL_LITERAL |
-	IDENTIFIER '(' expression ')' {$$ = find(lists, $1, "List");} |
+	IDENTIFIER '(' expression ')' { 
+		if ($3 != INT_TYPE){
+		appendError(GENERAL_SEMANTIC, "List Subscript Must Be Integer");
+	} else { 
+		$$ = find(lists, $1, "List");
+		}
+	} |
 	IDENTIFIER  {$$ = find(scalars, $1, "Scalar");} ;
 
 arithmetic_operator:

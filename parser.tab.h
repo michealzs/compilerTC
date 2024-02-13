@@ -39,7 +39,7 @@
 # define YY_YY_PARSER_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
-# define YYDEBUG 0
+# define YYDEBUG 1
 #endif
 #if YYDEBUG
 extern int yydebug;
@@ -69,35 +69,35 @@ extern int yydebug;
     ELSE = 270,                    /* ELSE  */
     ENDIF = 271,                   /* ENDIF  */
     IF = 272,                      /* IF  */
-    ADDOP = 273,                   /* ADDOP  */
-    MULOP = 274,                   /* MULOP  */
-    ANDOP = 275,                   /* ANDOP  */
-    RELOP = 276,                   /* RELOP  */
-    REMOP = 277,                   /* REMOP  */
-    EXPOP = 278,                   /* EXPOP  */
-    OROP = 279,                    /* OROP  */
-    NEGOP = 280,                   /* NEGOP  */
-    ARROW = 281,                   /* ARROW  */
-    THEN = 282,                    /* THEN  */
-    WHEN = 283,                    /* WHEN  */
-    BEGIN_ = 284,                  /* BEGIN_  */
-    BOOLEAN = 285,                 /* BOOLEAN  */
-    CHARACTER = 286,               /* CHARACTER  */
-    END = 287,                     /* END  */
-    REDUCE = 288,                  /* REDUCE  */
-    ENDCASE = 289,                 /* ENDCASE  */
-    ENDREDUCE = 290,               /* ENDREDUCE  */
-    ENDSWITCH = 291,               /* ENDSWITCH  */
-    FUNCTION = 292,                /* FUNCTION  */
-    INTEGER = 293,                 /* INTEGER  */
-    IS = 294,                      /* IS  */
-    LIST = 295,                    /* LIST  */
-    OF = 296,                      /* OF  */
-    OTHERS = 297,                  /* OTHERS  */
-    RETURNS = 298,                 /* RETURNS  */
-    SWITCH = 299,                  /* SWITCH  */
-    REAL = 300,                    /* REAL  */
-    ELSIF = 301,                   /* ELSIF  */
+    ELSIF = 273,                   /* ELSIF  */
+    ADDOP = 274,                   /* ADDOP  */
+    MULOP = 275,                   /* MULOP  */
+    ANDOP = 276,                   /* ANDOP  */
+    RELOP = 277,                   /* RELOP  */
+    REMOP = 278,                   /* REMOP  */
+    EXPOP = 279,                   /* EXPOP  */
+    OROP = 280,                    /* OROP  */
+    NEGOP = 281,                   /* NEGOP  */
+    ARROW = 282,                   /* ARROW  */
+    THEN = 283,                    /* THEN  */
+    WHEN = 284,                    /* WHEN  */
+    BEGIN_ = 285,                  /* BEGIN_  */
+    BOOLEAN = 286,                 /* BOOLEAN  */
+    CHARACTER = 287,               /* CHARACTER  */
+    END = 288,                     /* END  */
+    REDUCE = 289,                  /* REDUCE  */
+    ENDCASE = 290,                 /* ENDCASE  */
+    ENDREDUCE = 291,               /* ENDREDUCE  */
+    ENDSWITCH = 292,               /* ENDSWITCH  */
+    FUNCTION = 293,                /* FUNCTION  */
+    INTEGER = 294,                 /* INTEGER  */
+    IS = 295,                      /* IS  */
+    LIST = 296,                    /* LIST  */
+    OF = 297,                      /* OF  */
+    OTHERS = 298,                  /* OTHERS  */
+    RETURNS = 299,                 /* RETURNS  */
+    SWITCH = 300,                  /* SWITCH  */
+    REAL = 301,                    /* REAL  */
     FOLD = 302,                    /* FOLD  */
     ENDFOLD = 303,                 /* ENDFOLD  */
     LEFT = 304,                    /* LEFT  */
@@ -114,8 +114,9 @@ union YYSTYPE
 
 	CharPtr iden;
 	Types type;
+	
 
-#line 119 "parser.tab.h"
+#line 120 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

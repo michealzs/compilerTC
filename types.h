@@ -5,6 +5,8 @@
 
 // This file contains type definitions and the function
 // prototypes for the type checking functions
+#include <string>
+#include <vector>
 
 typedef char* CharPtr;
 
@@ -16,5 +18,8 @@ Types checkSwitch(Types case_, Types when, Types other);
 Types checkCases(Types left, Types right);
 Types checkArithmetic(Types left, Types right);
 Types checkIFThen(Types expression, Types left, Types right);
-Types checkRelational(Types left, Types right);
+Types checkRelation(Types left, Types right);
 Types checkNegation(Types operandType);
+string typeToString(Types type);
+Types checkCharacterComparison(Types leftType, Types rightType);
+Types checkIFThenElsifElse(Types conditionType, Types thenType, Types elsifType, Types elseType);
