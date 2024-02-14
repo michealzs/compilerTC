@@ -47,15 +47,29 @@ Types checkCases(Types left, Types right) {
 Types checkArithmetic(Types left, Types right) {
     if (left == MISMATCH || right == MISMATCH)
         return MISMATCH;
+    if (left == CHAR_TYPE || right == CHAR_TYPE) {
+        appendError(GENERAL_SEMANTIC, "Arithmetic Operator Requires Numeric Types");
+        return MISMATCH;
+    }
     if (left == INT_TYPE && right == INT_TYPE)
         return INT_TYPE;
     if ((left == INT_TYPE && right == REAL_TYPE) || (left == REAL_TYPE && right == INT_TYPE))
         return REAL_TYPE;
-    appendError(GENERAL_SEMANTIC, "Arithmetic operations require integer or real types");
+    appendError(GENERAL_SEMANTIC, "Arithmetic Operator Requires Numeric Type"s);
     return MISMATCH;
 }
 
 
+Types checkModulusTypes(Types left, Types right) {
+    if (left == MISMATCH || right == MISMATCH)
+        return MISMATCH;
+
+    if (left == INT_TYPE && right == INT_TYPE)
+        return INT_TYPE;
+
+    appendError(GENERAL_SEMANTIC, "Remainder Operator Requires Integer Operands");
+    return MISMATCH;
+}
 
 Types checkIFThen(Types expression, Types left, Types right){
 	std::cout << "\n " << std::endl;
@@ -63,7 +77,7 @@ Types checkIFThen(Types expression, Types left, Types right){
     std::cout << "Left type: " << typeToString(left) << std::endl;
     std::cout << "Right type: " << typeToString(right) << std::endl;
 	if (expression != BOOL_TYPE){
-		appendError(GENERAL_SEMANTIC, "If EExpression Must Be Boolean");
+		appendError(GENERAL_SEMANTIC, "If Expression Must Be Boolean");
 		return MISMATCH;
 	} else {
 		if (left != BOOL_TYPE || right !=BOOL_TYPE){
@@ -114,7 +128,11 @@ Types checkNegation(Types operandType) {
     if (operandType == INT_TYPE || operandType == REAL_TYPE) {
         return operandType;
     }
-    appendError(GENERAL_SEMANTIC, "Negation Not Supported for This Type");
+    if (operandType == CHAR_TYPE) {
+        appendError(GENERAL_SEMANTIC, "Arithmetic Operator Requires Numeric Types");
+        return MISMATCH;
+    }
+    appendError(GENERAL_SEMANTIC, "Arithmetic Operator Requires Numeric Type");
     return MISMATCH;
 }
 
@@ -142,6 +160,7 @@ string typeToString(Types type) {
 
 
 // => Marked for deletion 
+/*
 Types checkCharacterComparison(Types leftType, Types rightType) {
     if (leftType == CHAR_TYPE && rightType == CHAR_TYPE) {
         return BOOL_TYPE; 
@@ -151,6 +170,7 @@ Types checkCharacterComparison(Types leftType, Types rightType) {
     }
     return BOOL_TYPE; 
 }
+*/
 
     
 

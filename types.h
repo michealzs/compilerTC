@@ -22,4 +22,5 @@ Types checkRelation(Types left, Types right);
 Types checkNegation(Types operandType);
 string typeToString(Types type);
 Types checkCharacterComparison(Types leftType, Types rightType);
+Types checkModulusTypes(Types left, Types right);
 Types checkIFThenElsifElse(Types conditionType, Types thenType, Types elsifType, Types elseType);

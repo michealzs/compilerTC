@@ -150,7 +150,8 @@ relation:
 	expression RELOP expression {$$ = checkRelation($1, $3);};
 	
 term:
-	term MULOP primary {$$ = checkArithmetic($1, $3);} |
+	term arithmetic_operator primary {$$ = checkArithmetic($1, $3);} |
+	term REMOP primary { $$ = checkModulusTypes($1, $3);} |
 	primary ;
 
 primary:
@@ -170,7 +171,7 @@ primary:
 	IDENTIFIER  {$$ = find(scalars, $1, "Scalar");} ;
 
 arithmetic_operator:
-   MULOP | REMOP | EXPOP ;
+   MULOP | EXPOP ;
 
 %%
 Types find(Symbols<Types>& table, CharPtr identifier, string tableName) {
