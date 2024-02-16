@@ -17,17 +17,38 @@ using namespace std;
 #include "listing.h"
 
 void checkAssignment(Types lValue, Types rValue, string message) {
-	if (lValue != MISMATCH && rValue != MISMATCH && lValue != rValue)
+	if (lValue == MISMATCH || rValue == MISMATCH){
 		appendError(GENERAL_SEMANTIC, "Type Mismatch on " + message);
+        return;
+    }
+    if (lValue == INT_TYPE && rValue == REAL_TYPE ) {
+        appendError(GENERAL_SEMANTIC, "llegal Narrowing " + message);
+    } else if (lValue != rValue) {
+        appendError(GENERAL_SEMANTIC, "Type Mismatch on " + message);
+    }
+    /*mine compared to skeleton default 
+    if (lValue != rValue) {
+        // Check for specific cases of narrowing
+        if (lValue == INT_TYPE && rValue == REAL_TYPE) {
+            appendError(GENERAL_SEMANTIC, "Narrowing conversion from real to int on " + message);
+        } else {
+            appendError(GENERAL_SEMANTIC, "Type Mismatch on " + message);
+        }
+    }*/
+
 }
 
-Types checkWhen(Types true_, Types false_) {
-	if (true_ == MISMATCH || false_ == MISMATCH)
+
+Types checkWhen(Types expression, Types expression_) {
+    std::cout << "\n" << std::endl;
+    std::cout << "lexpression: " << typeToString(expression) << std::endl;
+    std::cout << "rexpression: " << typeToString(expression_) << std::endl;
+	if (expression == MISMATCH || expression_ == MISMATCH)
 		return MISMATCH;
-	if (true_ != false_)
+	if (expression != expression_)
 		appendError(GENERAL_SEMANTIC, "When Types Mismatch ");
-	return true_;
-}
+	return expression;
+} 
 
 Types checkSwitch(Types case_, Types when, Types other) {
 	if (case_ != INT_TYPE)
@@ -71,39 +92,40 @@ Types checkModulusTypes(Types left, Types right) {
     return MISMATCH;
 }
 
-Types checkIFThen(Types expression, Types left, Types right){
-	std::cout << "\n " << std::endl;
-	std::cout << "Expression type: " << typeToString(expression) << std::endl;
+Types checkIFThen(Types expression, Types left, Types right) {
+    std::cout << "\nExpression type: " << typeToString(expression) << std::endl;
     std::cout << "Left type: " << typeToString(left) << std::endl;
     std::cout << "Right type: " << typeToString(right) << std::endl;
-	if (expression != BOOL_TYPE){
-		appendError(GENERAL_SEMANTIC, "If Expression Must Be Boolean");
-		return MISMATCH;
-	} else {
-		if (left != BOOL_TYPE || right !=BOOL_TYPE){
-			appendError(GENERAL_SEMANTIC, "If-Then Type Mismatch");
-			return MISMATCH;
-		}
-		if ((left == INT_TYPE && right == REAL_TYPE) || (left == REAL_TYPE && right == INT_TYPE)){
-		appendError(GENERAL_SEMANTIC, "Illegal Narrowing Function Return");
-		return MISMATCH;
-		}
-		return INT_TYPE;
-	}
-	return BOOL_TYPE;
+
+    if (expression != BOOL_TYPE) {
+        appendError(GENERAL_SEMANTIC, "If Expression Must Be Boolean");
+        return MISMATCH;
+    } 
+
+    if (left != right) {
+        appendError(GENERAL_SEMANTIC, "If-Then Type Mismatch");
+        return MISMATCH;
+    }
+
+    return left; 
 }
 
+
 Types checkIFThenElsifElse(Types conditionType, Types thenType, Types elsifType, Types elseType) {
+    /*std::cout << "\n " << std::endl;
+    std::cout << "Then type: " << typeToString(thenType) << std::endl;
+    std::cout << "Elsif type: " << typeToString(elsifType) << std::endl;
+    std::cout << "Else type: " << typeToString(elseType) << std::endl;*/
     if (conditionType != BOOL_TYPE) {
         appendError(GENERAL_SEMANTIC, "Initial IF condition must be boolean");
         return MISMATCH;
     }
     if (thenType == MISMATCH || elsifType == MISMATCH || elseType == MISMATCH) {
-        appendError(GENERAL_SEMANTIC, "Type mmismatch in IF-ELSIF-ELSE statement");
+        appendError(GENERAL_SEMANTIC, "If-Elsif-Else Type Mismatch");
         return MISMATCH;
     }	
     if (thenType != elsifType || thenType != elseType) {
-        appendError(GENERAL_SEMANTIC, "Type mismatch between THEN, ELSIF, and ELSE parts");
+        appendError(GENERAL_SEMANTIC, "If-Elsif-Else Type Mismatch");
         return MISMATCH;
     }
     return thenType;
@@ -112,11 +134,24 @@ Types checkIFThenElsifElse(Types conditionType, Types thenType, Types elsifType,
 
 
 Types checkRelation(Types left, Types right) {
+    std::cout << "\n " << std::endl;
+    std::cout << "Left type: " << typeToString(left) << std::endl;
+    std::cout << "Right type: " << typeToString(right) << std::endl;
     if (left == MISMATCH || right == MISMATCH)
         return MISMATCH;
     if (left == right)
         return BOOL_TYPE;  
+    if (left == UNKNOWN_TYPE)
+        appendError(GENERAL_SEMANTIC, "Undeclared Scalar name");
+        return MISMATCH;
     appendError(GENERAL_SEMANTIC, "Character Literals Cannot be Compared to Numeric Expressions");
+    return MISMATCH;
+}
+
+Types check(Types left) {
+    std::cout << "\n " << std::endl;
+    std::cout << "Left type: " << typeToString(left) << std::endl;
+    
     return MISMATCH;
 }
 
@@ -159,8 +194,23 @@ string typeToString(Types type) {
 
 
 
-// => Marked for deletion 
 /*
+
+// => Marked for deletion 
+Types checkElsif(Types previousElsifType, Types conditionType, Types currentStatementType) {
+    
+    if (previousElsifType == NONE) {
+        return currentStatementType; // First 'elsif' after 'then'
+    }
+    if (previousElsifType != currentStatementType) {
+        appendError(GENERAL_SEMANTIC, "Type mismatch in ELSIF clauses");
+        return MISMATCH;
+    }
+    return currentStatementType;
+}
+
+
+
 Types checkCharacterComparison(Types leftType, Types rightType) {
     if (leftType == CHAR_TYPE && rightType == CHAR_TYPE) {
         return BOOL_TYPE; 

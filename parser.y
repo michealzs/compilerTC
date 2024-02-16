@@ -20,6 +20,7 @@ int yylex();
 void yyerror(const char* message);
 
 Types find(Symbols<Types>& table, CharPtr identifier, string tableName);
+Types functionReturnType;
 
 Symbols<Types> scalars;
 Symbols<Types> lists;
@@ -33,6 +34,7 @@ Symbols<Types> symbols;
 %union {
 	CharPtr iden;
 	Types type;
+
 	
 }
 
@@ -44,32 +46,52 @@ Symbols<Types> symbols;
 
 %token BEGIN_ BOOLEAN CHARACTER END REDUCE ENDCASE ENDREDUCE ENDSWITCH FUNCTION INTEGER IS LIST OF OTHERS RETURNS SWITCH REAL FOLD ENDFOLD LEFT RIGHT
 
-%type <type> list expressions body type statement_ statement cases case expression term primary if_statement condition relation elsif_clauses parameter 
+%type <type> list expressions body type statement_ statement cases case expression term primary if_statement condition relation elsif_clauses parameter fold_statement list_choice function_header optional_variable
 
 %%
 
 function:	
-	function_header optional_variable body ;
+	function_header optional_variable body {
+		checkAssignment(functionReturnType, $3, "function return");
+	} ;
 
 function_header:	
-	FUNCTION IDENTIFIER optional_parameters RETURNS type ';'  | FUNCTION IDENTIFIER parameters RETURNS type ';' | 
-	error ';' ;
+	FUNCTION IDENTIFIER optional_parameters RETURNS type ';'  {
+		functionReturnType = $5;
+	} | 
+	FUNCTION IDENTIFIER parameters RETURNS type ';' {
+		functionReturnType = $5;
+	} | 
+	error ';' {$$ = MISMATCH;};
 
 parameters:
     parameter optional_parameters ;
 
 optional_variable:
     optional_variable variable |
-    %empty | 
-    error ';';
+    %empty { $$ = NONE; }| 
+    error ';'{$$ = MISMATCH;};
 
 variable:	
-	IDENTIFIER ':' type IS statement ';' {checkAssignment($3, $5, "Variable Initialization"); scalars.insert($1, $3);}|
+	IDENTIFIER ':' type IS statement ';' {
+		Types typeCheck;
+		if (scalars.find($1, typeCheck) || lists.find($1, typeCheck)) {
+			appendError(GENERAL_SEMANTIC, "Semantic Error, Duplicate Scalar " + string($1));
+		} else {
+			checkAssignment($3, $5, "Variable Initialization"); 
+			scalars.insert($1, $3);
+		}
+	}|
 	IDENTIFIER ':' LIST OF type IS list ';' {
-	    if ($5 != $7) { 
-	        appendError(GENERAL_SEMANTIC, "List Types Does Not Match Element Types");
-	    }
-	    lists.insert($1, $5);
+		Types typeCheck;
+		if (scalars.find($1, typeCheck) || lists.find($1, typeCheck)) {
+			appendError(GENERAL_SEMANTIC, "Semantic Error, Duplicate List " + string($1));
+		} else {
+		    if ($5 != $7) { 
+		        appendError(GENERAL_SEMANTIC, "List Types Does Not Match Element Types");
+		    }
+		    lists.insert($1, $5);
+		}
 	};
 
 body:
@@ -116,15 +138,35 @@ statement:
 	expression |
 	WHEN condition ',' expression ':' expression {$$ = checkWhen($4, $6);}|
 	SWITCH expression IS cases OTHERS ARROW statement ';' ENDSWITCH {$$ = checkSwitch($2, $4, $7);} | 
-	if_statement ;
+	if_statement | 
+	fold_statement;
+
+fold_statement:
+    FOLD direction operator list_choice ENDFOLD {
+        if ($4 == CHAR_TYPE) {
+            appendError(GENERAL_SEMANTIC, "Fold Requires A Numeric List");
+            $$ = MISMATCH;
+        } else {
+            $$ = $4;
+        }
+    };
+
+direction:
+    LEFT | RIGHT ;
+
+operator:
+    ADDOP | MULOP ; 
+
+list_choice:
+    list {$$ = $1; }| IDENTIFIER {$$ = find(scalars, $1, "Scalar");};
 
 if_statement:
-    IF condition THEN statement_ elsif_clauses ENDIF { $$ =  checkIFThen($2, $4, $5);} |
+    IF condition THEN statement_ ELSE statement_ ENDIF { $$ =  checkIFThen($2, $4, $6);} |
     IF condition THEN statement_ elsif_clauses ELSE statement_ ENDIF { $$ = checkIFThenElsifElse($2, $4, $5, $7);};
 
 elsif_clauses:
     %empty { $$ = NONE; }|  
-    ELSIF condition THEN statement_ elsif_clauses ;
+    ELSIF condition THEN statement_ elsif_clauses { $$ = $2 ? $4 : $5; };
 
 cases:
 	cases case {$$ = checkCases($1, $2);}|
@@ -168,7 +210,10 @@ primary:
 		$$ = find(lists, $1, "List");
 		}
 	} |
-	IDENTIFIER  {$$ = find(scalars, $1, "Scalar");} ;
+	IDENTIFIER  { if (!scalars.find($1, $$) && !lists.find($1, $$)) {
+            appendError(GENERAL_SEMANTIC, "Semantic Error, Undeclared Scalar " + string($1));
+        }
+    };
 
 arithmetic_operator:
    MULOP | EXPOP ;

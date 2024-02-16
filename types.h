@@ -8,9 +8,11 @@
 #include <string>
 #include <vector>
 
+
+
 typedef char* CharPtr;
 
-enum Types { MISMATCH,BOOL_TYPE,FLOAT_TYPE, INT_TYPE,REAL_TYPE, CHAR_TYPE, NONE};
+enum Types { UNKNOWN_TYPE,MISMATCH,BOOL_TYPE,FLOAT_TYPE, INT_TYPE,REAL_TYPE, CHAR_TYPE, NONE};
 
 void checkAssignment(Types lValue, Types rValue, string message);
 Types checkWhen(Types true_, Types false_);
@@ -24,3 +26,5 @@ string typeToString(Types type);
 Types checkCharacterComparison(Types leftType, Types rightType);
 Types checkModulusTypes(Types left, Types right);
 Types checkIFThenElsifElse(Types conditionType, Types thenType, Types elsifType, Types elseType);
+Types checkElsif(Types previousElsifType, Types conditionType, Types currentStatementType);
+Types check(Types listChoice);
