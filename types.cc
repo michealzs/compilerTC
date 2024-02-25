@@ -17,14 +17,20 @@ using namespace std;
 #include "listing.h"
 
 void checkAssignment(Types lValue, Types rValue, string message) {
-	if (lValue == MISMATCH || rValue == MISMATCH){
+	std::cout << "\n " << std::endl;
+    std::cout << "==== >> Left Val: " << typeToString(lValue) << std::endl;
+    std::cout << "==== >> Right Val: " << typeToString(rValue) << std::endl;
+
+    if (lValue == MISMATCH || rValue == MISMATCH){
 		appendError(GENERAL_SEMANTIC, "Type Mismatch on " + message);
         return;
     }
     if (lValue == INT_TYPE && rValue == REAL_TYPE ) {
         appendError(GENERAL_SEMANTIC, "llegal Narrowing " + message);
+        return;
     } else if (lValue != rValue) {
         appendError(GENERAL_SEMANTIC, "Type Mismatch on " + message);
+        return;
     }
     /*mine compared to skeleton default 
     if (lValue != rValue) {
@@ -38,6 +44,16 @@ void checkAssignment(Types lValue, Types rValue, string message) {
 
 }
 
+void checkFunctionAssignment(Types lValue, Types rValue, string message) {
+    std::cout << "\n " << std::endl;
+    std::cout << "==== >> Left Val: " << typeToString(lValue) << std::endl;
+    std::cout << "==== >> Right Val: " << typeToString(rValue) << std::endl;
+
+    if (lValue == INT_TYPE && rValue == REAL_TYPE ) {
+        appendError(GENERAL_SEMANTIC, "llegal Narrowing " + message);
+        return;
+    } 
+}
 
 Types checkWhen(Types expression, Types expression_) {
     std::cout << "\n" << std::endl;
@@ -94,8 +110,8 @@ Types checkModulusTypes(Types left, Types right) {
 
 Types checkIFThen(Types expression, Types left, Types right) {
     std::cout << "\nExpression type: " << typeToString(expression) << std::endl;
-    std::cout << "Left type: " << typeToString(left) << std::endl;
-    std::cout << "Right type: " << typeToString(right) << std::endl;
+    std::cout << "Left typee: " << typeToString(left) << std::endl;
+    std::cout << "Right typee: " << typeToString(right) << std::endl;
 
     if (expression != BOOL_TYPE) {
         appendError(GENERAL_SEMANTIC, "If Expression Must Be Boolean");
@@ -117,11 +133,9 @@ Types checkIFThenElsifElse(Types conditionType, Types thenType, Types elsifType,
     std::cout << "Elsif type: " << typeToString(elsifType) << std::endl;
     std::cout << "Else type: " << typeToString(elseType) << std::endl;*/
     if (conditionType != BOOL_TYPE) {
-        appendError(GENERAL_SEMANTIC, "Initial IF condition must be boolean");
         return MISMATCH;
     }
     if (thenType == MISMATCH || elsifType == MISMATCH || elseType == MISMATCH) {
-        appendError(GENERAL_SEMANTIC, "If-Elsif-Else Type Mismatch");
         return MISMATCH;
     }	
     if (thenType != elsifType || thenType != elseType) {
@@ -135,16 +149,22 @@ Types checkIFThenElsifElse(Types conditionType, Types thenType, Types elsifType,
 
 Types checkRelation(Types left, Types right) {
     std::cout << "\n " << std::endl;
-    std::cout << "Left type: " << typeToString(left) << std::endl;
-    std::cout << "Right type: " << typeToString(right) << std::endl;
-    if (left == MISMATCH || right == MISMATCH)
+    std::cout << "Left typecr: " << typeToString(left) << std::endl;
+    std::cout << "Right typecr: " << typeToString(right) << std::endl;
+    if (left == MISMATCH || right == MISMATCH){
         return MISMATCH;
-    if (left == right)
+    }
+    if (left == right){
         return BOOL_TYPE;  
-    if (left == UNKNOWN_TYPE)
+    }
+    if (left == UNKNOWN_TYPE){
         appendError(GENERAL_SEMANTIC, "Undeclared Scalar name");
         return MISMATCH;
-    appendError(GENERAL_SEMANTIC, "Character Literals Cannot be Compared to Numeric Expressions");
+    }
+    if (left == CHAR_TYPE && right == INT_TYPE){
+        appendError(GENERAL_SEMANTIC, "Character Literals Cannot be Compared to Numeric Expressions");
+        return MISMATCH;
+    }
     return MISMATCH;
 }
 
@@ -165,7 +185,7 @@ Types checkNegation(Types operandType) {
     }
     if (operandType == CHAR_TYPE) {
         appendError(GENERAL_SEMANTIC, "Arithmetic Operator Requires Numeric Types");
-        return MISMATCH;
+        return operandType;
     }
     appendError(GENERAL_SEMANTIC, "Arithmetic Operator Requires Numeric Type");
     return MISMATCH;

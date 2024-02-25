@@ -52,7 +52,7 @@ Symbols<Types> symbols;
 
 function:	
 	function_header optional_variable body {
-		checkAssignment(functionReturnType, $3, "function return");
+		checkFunctionAssignment(functionReturnType, $3, "function return");
 	} ;
 
 function_header:	
@@ -88,7 +88,9 @@ variable:
 			appendError(GENERAL_SEMANTIC, "Semantic Error, Duplicate List " + string($1));
 		} else {
 		    if ($5 != $7) { 
-		        appendError(GENERAL_SEMANTIC, "List Types Does Not Match Element Types");
+		    	if (!errorExists("Semantic Error, List Element Types Do Not Match")) {
+				    appendError(GENERAL_SEMANTIC, "List Type Does Not Match Element Types");
+				}
 		    }
 		    lists.insert($1, $5);
 		}

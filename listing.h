@@ -13,4 +13,4 @@ void firstLine();
 void nextLine();
 int lastLine();
 void appendError(ErrorCategories errorCategory, string message);
-
+bool errorExists(const string& specificError);

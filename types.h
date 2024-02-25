@@ -15,6 +15,7 @@ typedef char* CharPtr;
 enum Types { UNKNOWN_TYPE,MISMATCH,BOOL_TYPE,FLOAT_TYPE, INT_TYPE,REAL_TYPE, CHAR_TYPE, NONE};
 
 void checkAssignment(Types lValue, Types rValue, string message);
+void checkFunctionAssignment(Types lValue, Types rValue, string message);
 Types checkWhen(Types true_, Types false_);
 Types checkSwitch(Types case_, Types when, Types other);
 Types checkCases(Types left, Types right);

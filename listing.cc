@@ -52,7 +52,19 @@ int lastLine() {
 		printf("Compiled Successfully\n\n");
 	return totalErrors;
 }
-    
+
+bool errorExists(const string& specificError) {
+    for (const string& error : errors) {
+        if (error.find(specificError) != string::npos) {
+            // The specific error message is found in the error stack
+            return true;
+        }
+    }
+    // The specific error message is not in the error stack
+    return false;
+}
+
+
 void appendError(ErrorCategories errorCategory, string message) {
 	string messages[] = { "Lexical Error, Invalid Character ", 
 	"Syntax Error, ", "Semantic Error, ",
