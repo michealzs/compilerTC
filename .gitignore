@@ -1,0 +1,16 @@
+# flex, bison and make output. The makefile regenerates all of these from
+# scanner.l and parser.y; the copies already tracked in this repository
+# stay tracked, this only keeps new build output from being added.
+scanner.c
+lex.yy.c
+parser.c
+parser.tab.c
+parser.tab.h
+parser.output
+tokens.h
+*.o
+compile
+
+# editor and OS files
+.DS_Store
+*.swp
